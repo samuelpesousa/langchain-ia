@@ -14,3 +14,11 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 langgraph dev
+```
+### 2. Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
