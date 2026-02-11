@@ -8,7 +8,10 @@ import {
   Menu,
   BookOpen,
   ExternalLink,
+  Sun,
+  Moon,
 } from "lucide-react";
+import { useState, useEffect } from "react";
 import {
   CATEGORIES,
   getExamplesByCategory,
@@ -40,47 +43,48 @@ export function Sidebar({
 
   return (
     <>
-      {/* Mobile overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
+          className="fixed inset-0 bg-zinc-950/60 backdrop-blur-sm z-40 lg:hidden"
           onClick={onToggle}
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={`
           fixed lg:static inset-y-0 left-0 z-50
-          w-72 bg-neutral-950 border-r border-neutral-800
+          w-72 bg-white dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800
           transform transition-transform duration-200 ease-out
           ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
-          flex flex-col
+          flex flex-col transition-colors duration-300
         `}
       >
-        {/* Header */}
-        <div className="flex items-center gap-3 px-4 py-5 border-b border-neutral-800">
-          <div className="h-8 w-8 rounded-lg flex items-center justify-center bg-blue-500 overflow-hidden">
+        <div className="flex items-center gap-3 px-4 py-5 border-b border-zinc-200 dark:border-zinc-800">
+          <div className="h-8 w-8 rounded-lg flex items-center justify-center bg-blue-900 overflow-hidden shadow-sm">
             <img
               src="/assets/logo.png"
               alt="Logo"
               className="h-8 w-8 object-contain"
+              onError={(e) => (e.currentTarget.style.display = "none")}
             />
           </div>
-          <div>
-            <h1 className="text-sm font-semibold text-white">CODEXA</h1>
-            <p className="text-xs text-neutral-500">Câmbio & Despacho</p>
+          <div className="min-w-0">
+            <h1 className="text-sm font-bold text-zinc-900 dark:text-white truncate">
+              CODEXA
+            </h1>
+            <p className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate">
+              Câmbio & Despacho
+            </p>
           </div>
           <button
             onClick={onToggle}
-            className="lg:hidden ml-auto p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-400"
+            className="lg:hidden ml-auto p-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Examples list */}
-        <nav className="flex-1 overflow-y-auto py-4 px-3">
+        <nav className="flex-1 overflow-y-auto py-4 px-3 scrollbar-thin scrollbar-thumb-zinc-200 dark:scrollbar-thumb-zinc-800">
           {Array.from(examplesByCategory.entries()).map(
             ([category, examples]) => {
               if (examples.length === 0) return null;
@@ -90,7 +94,7 @@ export function Sidebar({
               return (
                 <div key={category} className="mb-6">
                   <div className="px-2 mb-2">
-                    <h2 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">
+                    <h2 className="text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">
                       {categoryMeta.label}
                     </h2>
                   </div>
@@ -111,10 +115,10 @@ export function Sidebar({
                           transition-all duration-150 border cursor-pointer
                           ${
                             isSelected
-                              ? "bg-brand-dark/30 text-white border-brand-dark/50"
+                              ? "bg-blue-50 dark:bg-blue-900/20 text-blue-900 dark:text-blue-300 border-blue-200 dark:border-blue-900/40"
                               : example.ready
-                              ? "text-neutral-400 hover:bg-neutral-800/50 hover:text-neutral-200 border-transparent"
-                              : "text-neutral-600 cursor-not-allowed border-transparent"
+                              ? "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-100 border-transparent"
+                              : "text-zinc-400 dark:text-zinc-600 cursor-not-allowed border-transparent opacity-60"
                           }
                         `}
                         >
@@ -123,10 +127,8 @@ export function Sidebar({
                             mt-0.5 shrink-0
                             ${
                               isSelected
-                                ? "text-brand-accent"
-                                : example.ready
-                                ? "text-neutral-500"
-                                : "text-neutral-700"
+                                ? "text-blue-700 dark:text-blue-400"
+                                : "text-zinc-400 dark:text-zinc-500"
                             }
                           `}
                           >
@@ -134,16 +136,16 @@ export function Sidebar({
                           </span>
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2">
-                              <span className="text-sm font-medium truncate">
+                              <span className="text-sm font-semibold truncate">
                                 {example.title}
                               </span>
                               {!example.ready && (
-                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-500 font-medium">
-                                  Soon
+                                <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-zinc-200 dark:bg-zinc-800 text-zinc-500 font-bold uppercase tracking-tighter">
+                                  Em breve
                                 </span>
                               )}
                             </div>
-                            <p className="text-xs text-neutral-500 mt-0.5 line-clamp-2">
+                            <p className="text-[11px] text-zinc-500 dark:text-zinc-500 mt-0.5 line-clamp-2 leading-snug">
                               {example.description}
                             </p>
                           </div>
@@ -157,34 +159,56 @@ export function Sidebar({
           )}
         </nav>
 
-        {/* Footer */}
-        <div className="px-4 py-4 border-t border-neutral-800">
+        <div className="px-4 py-4 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between bg-zinc-50/50 dark:bg-zinc-950/50">
           <a
-            href="https://docs.langchain.com/#typescript"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 text-xs text-neutral-500 hover:text-brand-accent transition-colors"
+            href="#"
+            className="flex items-center gap-2 text-xs font-medium text-zinc-500 dark:text-zinc-400 hover:text-blue-900 dark:hover:text-blue-400 transition-colors"
           >
             <BookOpen className="w-4 h-4" strokeWidth={1.5} />
-            <span>Documentation</span>
-            <ExternalLink className="w-3 h-3 ml-auto" />
+            <span>Minha conta</span>
+            <ExternalLink className="w-3 h-3 opacity-50" />
           </a>
+          <ThemeToggle />
         </div>
       </aside>
     </>
   );
 }
 
-/**
- * Toggle button for mobile sidebar
- */
 export function SidebarToggle({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="lg:hidden fixed top-4 left-4 z-30 p-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-brand-accent hover:border-brand-dark transition-colors"
+      className="lg:hidden fixed top-4 left-4 z-30 p-2 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 hover:text-blue-900 dark:hover:text-blue-400 shadow-sm transition-all"
     >
       <Menu className="w-5 h-5" />
+    </button>
+  );
+}
+
+function ThemeToggle() {
+  const [dark, setDark] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return document.documentElement.classList.contains("dark");
+  });
+
+  useEffect(() => {
+    if (dark) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  }, [dark]);
+
+  return (
+    <button
+      onClick={() => setDark((d) => !d)}
+      className="p-2 rounded-lg bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all border border-zinc-200 dark:border-zinc-800"
+      title={dark ? "Mudar para tema claro" : "Mudar para tema escuro"}
+    >
+      {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
     </button>
   );
 }

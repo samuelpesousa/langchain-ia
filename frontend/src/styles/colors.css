@@ -1,0 +1,27 @@
+:root {
+  --color-bg-light: #ffffff;
+  --color-bg-dark: #09090b;
+  --color-text-light: #18181b;
+  --color-text-dark: #fafafa;
+  --color-primary: #1e4545;
+  --color-accent: #beb4fd;
+  --color-accent-light: #eae8fe;
+  --color-border: #27272a;
+  --color-sidebar-light: #f4f4f5;
+  --color-sidebar-dark: #18181b;
+  --color-brand-dark: #1e4545;
+  --color-brand-accent: #beb4fd;
+  --color-brand-light: #eae8fe;
+}
+
+.dark {
+  --color-bg: var(--color-bg-dark);
+  --color-text: var(--color-text-dark);
+  --color-sidebar: var(--color-sidebar-dark);
+}
+
+.light, :root {
+  --color-bg: var(--color-bg-light);
+  --color-text: var(--color-text-light);
+  --color-sidebar: var(--color-sidebar-light);
+}

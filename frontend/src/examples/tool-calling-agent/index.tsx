@@ -49,8 +49,11 @@ export function ToolCallingAgent() {
   );
 
   return (
-    <div className="h-full flex flex-col">
-      <main ref={scrollRef} className="flex-1 overflow-y-auto">
+    <div className="h-full flex flex-col bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 transition-colors duration-300">
+      <main
+        ref={scrollRef}
+        className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-300 dark:scrollbar-thumb-zinc-800"
+      >
         <div ref={contentRef} className="max-w-2xl mx-auto px-4 py-8">
           {!hasMessages ? (
             <EmptyState
@@ -98,24 +101,26 @@ export function ToolCallingAgent() {
 
       {stream.error != null && (
         <div className="max-w-2xl mx-auto px-4 pb-3">
-          <div className="bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 text-red-400 text-sm">
+          <div className="bg-red-500/10 dark:bg-red-900/20 border border-red-500/20 dark:border-red-800/50 rounded-lg px-4 py-3 text-red-600 dark:text-red-400 text-sm">
             <div className="flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>
                 {stream.error instanceof Error
                   ? stream.error.message
-                  : "An error occurred"}
+                  : "Ocorreu um erro inesperado"}
               </span>
             </div>
           </div>
         </div>
       )}
 
-      <MessageInput
-        disabled={stream.isLoading}
-        placeholder="Pergunte sobre câmbio, despacho ou fornecedores..."
-        onSubmit={handleSubmit}
-      />
+      <div className="border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-4">
+        <MessageInput
+          disabled={stream.isLoading}
+          placeholder="Pergunte sobre câmbio, despacho ou fornecedores..."
+          onSubmit={handleSubmit}
+        />
+      </div>
     </div>
   );
 }

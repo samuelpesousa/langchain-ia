@@ -25,16 +25,16 @@ export function MessageInput({
   };
 
   return (
-    <footer className="border-t border-neutral-800">
+    <footer className=" border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 transition-colors">
       <div className="max-w-2xl mx-auto px-4 py-4">
         <form className="relative" onSubmit={handleSubmit}>
-          <div className="relative bg-neutral-900 rounded-xl border border-neutral-800 focus-within:border-brand-dark transition-colors">
+          <div className="relative bg-zinc-100 dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 focus-within:border-blue-900/50 dark:focus-within:border-blue-800/50 transition-all shadow-sm">
             <textarea
               name="content"
               placeholder={placeholder}
               rows={1}
               disabled={disabled}
-              className="w-full bg-transparent text-white placeholder-neutral-500 px-4 py-3 pr-12 resize-none focus:outline-none text-sm leading-relaxed max-h-[200px] disabled:opacity-50 field-sizing-content"
+              className="w-full bg-transparent text-zinc-900 dark:text-zinc-100 placeholder-zinc-500 px-4 py-3 pr-12 resize-none focus:outline-none text-sm leading-relaxed max-h-[200px] disabled:opacity-50 field-sizing-content"
               onKeyDown={(e) => {
                 const target = e.target as HTMLTextAreaElement;
 
@@ -48,18 +48,18 @@ export function MessageInput({
             <button
               type="submit"
               disabled={disabled}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-brand-accent hover:bg-brand-light disabled:bg-neutral-700 disabled:cursor-not-allowed text-black disabled:text-neutral-500 transition-colors"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-blue-900 dark:bg-blue-900 hover:bg-blue-800 text-white disabled:bg-zinc-300 dark:disabled:bg-zinc-800 disabled:cursor-not-allowed disabled:text-zinc-500 transition-colors shadow-sm"
             >
-              <ArrowUp className="w-4 h-4" />
+              <ArrowUp className="w-4 h-4" strokeWidth={2.5} />
             </button>
           </div>
 
-          <p className="text-center text-xs text-neutral-600 mt-3">
-            <kbd className="px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-400 font-mono text-xs">
+          <p className="text-center text-xs text-zinc-500 dark:text-zinc-500 mt-3">
+            <kbd className="px-1.5 py-0.5 rounded bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-mono text-[10px] uppercase">
               Enter
             </kbd>{" "}
             para enviar ·{" "}
-            <kbd className="px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-400 font-mono text-xs">
+            <kbd className="px-1.5 py-0.5 rounded bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-mono text-[10px] uppercase">
               Shift + Enter
             </kbd>{" "}
             para nova linha

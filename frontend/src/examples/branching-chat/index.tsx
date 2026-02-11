@@ -12,7 +12,6 @@ import { useStream } from "@langchain/langgraph-sdk/react";
 import type { Message } from "@langchain/langgraph-sdk";
 import type { InferAgentToolCalls } from "@langchain/langgraph-sdk/react";
 
-import { registerExample } from "../registry";
 import { LoadingIndicator } from "../../components/Loading";
 import { EmptyState } from "../../components/States";
 import { MessageInput } from "../../components/MessageInput";
@@ -22,29 +21,23 @@ import type { agent } from "./agent";
 import { BranchSwitcher } from "./components/BranchSwitcher";
 
 const BRANCHING_SUGGESTIONS = [
-  "Tell me an interesting fact about science",
-  "What's 15% of 230?",
-  "Give me a random history fact",
+  "Conte-me um fato científico interessante",
+  "Quanto é 15% de 230?",
+  "Dê-me um fato histórico aleatório",
 ];
 
-/**
- * Helper to check if a message has actual text content.
- */
 function hasContent(message: Message): boolean {
   if (typeof message.content === "string") {
     return message.content.trim().length > 0;
   }
   if (Array.isArray(message.content)) {
     return message.content.some(
-      (c) => c.type === "text" && c.text.trim().length > 0
+      (c) => c.type === "text" && c.text.trim().length > 0,
     );
   }
   return false;
 }
 
-/**
- * Extract text content from a message
- */
 function getTextContent(message: Message): string {
   if (typeof message.content === "string") {
     return message.content;
@@ -58,9 +51,6 @@ function getTextContent(message: Message): string {
   return "";
 }
 
-/**
- * Inline edit component for human messages
- */
 function EditableMessage({
   content,
   onSave,
@@ -76,8 +66,7 @@ function EditableMessage({
     <div className="flex flex-col gap-2 w-full">
       <textarea
         value={value}
-        onChange={(e) => setValue(e.target.value)}
-        className="w-full px-3 py-2 bg-neutral-800 border border-neutral-600 rounded-lg text-neutral-100 text-sm resize-none focus:outline-none focus:border-purple-500"
+        className="w-full px-3 py-2 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-lg text-zinc-900 dark:text-zinc-100 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-900/40 focus:border-blue-900 transition-all"
         rows={3}
         autoFocus
       />
@@ -85,18 +74,18 @@ function EditableMessage({
         <button
           type="button"
           onClick={onCancel}
-          className="px-3 py-1.5 text-xs rounded-lg bg-neutral-700 hover:bg-neutral-600 text-neutral-300 transition-colors flex items-center gap-1"
+          className="px-3 py-1.5 text-xs rounded-lg bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 transition-colors flex items-center gap-1"
         >
           <X className="w-3 h-3" />
-          Cancel
+          Cancelar
         </button>
         <button
           type="button"
           onClick={() => onSave(value)}
-          className="px-3 py-1.5 text-xs rounded-lg bg-purple-600 hover:bg-purple-500 text-white transition-colors flex items-center gap-1"
+          className="px-3 py-1.5 text-xs rounded-lg bg-blue-900 hover:bg-blue-800 text-white transition-colors flex items-center gap-1"
         >
           <Check className="w-3 h-3" />
-          Save & Branch
+          Salvar e Ramificar
         </button>
       </div>
     </div>
@@ -107,7 +96,6 @@ export function BranchingChat() {
   const stream = useStream<typeof agent>({
     assistantId: "agent",
     apiUrl: "http://localhost:2024",
-    // Enable state history fetching for branching support
     fetchStateHistory: true,
   });
 
@@ -120,53 +108,43 @@ export function BranchingChat() {
     (content: string) => {
       stream.submit({ messages: [{ content, type: "human" }] });
     },
-    [stream]
+    [stream],
   );
 
-  /**
-   * Edit a human message - creates a new branch from the parent checkpoint
-   */
   const handleEditMessage = useCallback(
     (
       message: Message<InferAgentToolCalls<typeof agent>>,
-      newContent: string
+      newContent: string,
     ) => {
       const meta = stream.getMessagesMetadata(message);
       const parentCheckpoint = meta?.firstSeenState?.parent_checkpoint;
-
-      // Submit from the parent checkpoint with the new message content
       stream.submit(
         { messages: [{ content: newContent, type: "human" }] },
-        { checkpoint: parentCheckpoint }
+        { checkpoint: parentCheckpoint },
       );
       setEditingMessageId(null);
     },
-    [stream]
+    [stream],
   );
 
-  /**
-   * Regenerate an AI response - creates a new branch from the parent checkpoint
-   */
   const handleRegenerate = useCallback(
     (message: Message<InferAgentToolCalls<typeof agent>>) => {
       const meta = stream.getMessagesMetadata(message);
       const parentCheckpoint = meta?.firstSeenState?.parent_checkpoint;
-
-      // Submit with undefined to regenerate from the parent checkpoint
       stream.submit(undefined, { checkpoint: parentCheckpoint });
     },
-    [stream]
+    [stream],
   );
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 transition-colors">
       <main ref={scrollRef} className="flex-1 overflow-y-auto">
         <div ref={contentRef} className="max-w-2xl mx-auto px-4 py-8">
           {!hasMessages ? (
             <EmptyState
               icon={GitBranch}
-              title="Branching Chat"
-              description="Explore alternate conversation paths! Edit any message to branch the conversation, or regenerate AI responses to see different outcomes. Navigate between branches using the switcher."
+              title="Chat com Ramificações"
+              description="Explore caminhos alternativos! Edite qualquer mensagem para ramificar a conversa ou regenere as respostas da IA para ver resultados diferentes."
               suggestions={BRANCHING_SUGGESTIONS}
               onSuggestionClick={handleSubmit}
             />
@@ -176,18 +154,15 @@ export function BranchingChat() {
                 const meta = stream.getMessagesMetadata(message);
                 const isEditing = editingMessageId === message.id;
 
-                // For AI messages, check if they have tool calls
                 if (message.type === "ai") {
                   const toolCalls = stream.getToolCalls(message);
 
-                  // Render tool calls if present
                   if (toolCalls.length > 0) {
                     return (
                       <div key={message.id} className="flex flex-col gap-3">
                         {toolCalls.map((toolCall) => (
                           <ToolCallCard key={toolCall.id} toolCall={toolCall} />
                         ))}
-                        {/* Regenerate button for tool calls */}
                         <div className="flex items-center gap-2">
                           <BranchSwitcher
                             branch={meta?.branch}
@@ -198,28 +173,24 @@ export function BranchingChat() {
                             type="button"
                             onClick={() => handleRegenerate(message)}
                             disabled={stream.isLoading}
-                            className="inline-flex items-center gap-1 px-2 py-1 text-xs text-neutral-400 hover:text-purple-400 hover:bg-neutral-800/50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            title="Regenerate (creates a new branch)"
+                            className="inline-flex items-center gap-1 px-2 py-1 text-xs text-zinc-500 hover:text-blue-900 dark:hover:text-blue-400 transition-colors disabled:opacity-50"
+                            title="Regenerar (cria uma nova ramificação)"
                           >
                             <RefreshCw className="w-3 h-3" />
-                            Regenerate
+                            Regenerar
                           </button>
                         </div>
                       </div>
                     );
                   }
 
-                  // Skip AI messages without content
-                  if (!hasContent(message)) {
-                    return null;
-                  }
+                  if (!hasContent(message)) return null;
 
-                  // Render AI message with regenerate option
                   return (
                     <div key={message.id ?? idx} className="animate-fade-in">
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="text-xs font-medium text-neutral-500">
-                          Assistant
+                        <span className="text-xs font-medium text-zinc-500">
+                          Assistente
                         </span>
                         <BranchSwitcher
                           branch={meta?.branch}
@@ -227,29 +198,25 @@ export function BranchingChat() {
                           onSelect={(branch) => stream.setBranch(branch)}
                         />
                       </div>
-                      <div className="text-neutral-100">
-                        <div className="whitespace-pre-wrap leading-relaxed text-[15px]">
-                          {getTextContent(message)}
-                        </div>
+                      <div className="text-zinc-900 dark:text-zinc-100 leading-relaxed text-[15px]">
+                        {getTextContent(message)}
                       </div>
-                      {/* Regenerate button */}
                       <div className="mt-2 flex items-center gap-2">
                         <button
                           type="button"
                           onClick={() => handleRegenerate(message)}
                           disabled={stream.isLoading}
-                          className="inline-flex items-center gap-1 px-2 py-1 text-xs text-neutral-400 hover:text-purple-400 hover:bg-neutral-800/50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          title="Regenerate response (creates a new branch)"
+                          className="inline-flex items-center gap-1 px-2 py-1 text-xs text-zinc-500 hover:text-blue-900 dark:hover:text-blue-400 transition-colors disabled:opacity-50"
+                          title="Regenerar resposta"
                         >
                           <RefreshCw className="w-3 h-3" />
-                          Regenerate
+                          Regenerar
                         </button>
                       </div>
                     </div>
                   );
                 }
 
-                // Human messages with edit option
                 if (message.type === "human") {
                   return (
                     <div key={message.id ?? idx} className="animate-fade-in">
@@ -262,7 +229,7 @@ export function BranchingChat() {
                       </div>
                       <div className="flex justify-end">
                         {isEditing ? (
-                          <div className="w-full max-w-[85%] md:max-w-[70%]">
+                          <div className="w-full max-w-[85%]">
                             <EditableMessage
                               content={getTextContent(message)}
                               onSave={(newContent) =>
@@ -272,19 +239,19 @@ export function BranchingChat() {
                             />
                           </div>
                         ) : (
-                          <div className="group relative">
-                            <div className="bg-brand-dark text-brand-light rounded-2xl px-4 py-2.5 max-w-[85%] md:max-w-[70%] w-fit">
+                          <div className="group relative max-w-[85%]">
+                            {/* Balão humano em Azul Marinho sutil */}
+                            <div className="bg-blue-50 dark:bg-blue-900/20 text-blue-900 dark:text-blue-100 border border-blue-100 dark:border-blue-900/30 rounded-2xl px-4 py-2.5">
                               <div className="whitespace-pre-wrap leading-relaxed text-[15px]">
                                 {getTextContent(message)}
                               </div>
                             </div>
-                            {/* Edit button */}
                             <button
                               type="button"
                               onClick={() => setEditingMessageId(message.id!)}
                               disabled={stream.isLoading}
-                              className="absolute -left-8 top-1/2 -translate-y-1/2 p-1.5 text-neutral-500 hover:text-purple-400 hover:bg-neutral-800/50 rounded opacity-0 group-hover:opacity-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                              title="Edit message (creates a new branch)"
+                              className="absolute -left-8 top-1/2 -translate-y-1/2 p-1.5 text-zinc-400 hover:text-blue-900 dark:hover:text-blue-400 opacity-0 group-hover:opacity-100 transition-all"
+                              title="Editar mensagem"
                             >
                               <Pencil className="w-3.5 h-3.5" />
                             </button>
@@ -295,32 +262,20 @@ export function BranchingChat() {
                   );
                 }
 
-                // Tool messages are handled by ToolCallCard
-                if (message.type === "tool") {
-                  return null;
-                }
+                if (message.type === "tool") return null;
 
-                // System messages
                 return (
                   <div key={message.id ?? idx} className="animate-fade-in">
-                    <div className="text-xs font-medium text-neutral-500 mb-2">
-                      System
+                    <div className="text-xs font-medium text-zinc-500 mb-2">
+                      Sistema
                     </div>
-                    <div className="bg-amber-500/10 border border-amber-500/20 text-amber-200 rounded-lg px-4 py-3">
-                      <div className="whitespace-pre-wrap leading-relaxed text-[15px]">
-                        {getTextContent(message)}
-                      </div>
+                    <div className="bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-200 rounded-lg px-4 py-3 text-[15px]">
+                      {getTextContent(message)}
                     </div>
                   </div>
                 );
               })}
-
-              {/* Show loading indicator when streaming */}
-              {stream.isLoading &&
-                !stream.messages.some(
-                  (m) => m.type === "ai" && hasContent(m)
-                ) &&
-                stream.toolCalls.length === 0 && <LoadingIndicator />}
+              {stream.isLoading && <LoadingIndicator />}
             </div>
           )}
         </div>
@@ -328,42 +283,30 @@ export function BranchingChat() {
 
       {stream.error != null && (
         <div className="max-w-2xl mx-auto px-4 pb-3">
-          <div className="bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 text-red-400 text-sm">
-            <div className="flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              <span>
-                {stream.error instanceof Error
-                  ? stream.error.message
-                  : "An error occurred"}
-              </span>
-            </div>
+          <div className="bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 text-red-600 dark:text-red-400 text-sm flex items-center gap-2">
+            <AlertCircle className="w-4 h-4" />
+            <span>
+              {stream.error instanceof Error
+                ? stream.error.message
+                : "Ocorreu um erro inesperado"}
+            </span>
           </div>
         </div>
       )}
 
-      <MessageInput
-        disabled={stream.isLoading || editingMessageId !== null}
-        placeholder={
-          editingMessageId
-            ? "Finish editing the message first..."
-            : "Ask me anything..."
-        }
-        onSubmit={handleSubmit}
-      />
+      <div className="p-4 border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+        <MessageInput
+          disabled={stream.isLoading || editingMessageId !== null}
+          placeholder={
+            editingMessageId
+              ? "Finalize a edição primeiro..."
+              : "Pergunte qualquer coisa..."
+          }
+          onSubmit={handleSubmit}
+        />
+      </div>
     </div>
   );
 }
-
-// Register this example
-registerExample({
-  id: "branching-chat",
-  title: "Branching Chat",
-  description:
-    "Explore alternate conversation paths by editing messages or regenerating responses",
-  category: "advanced",
-  icon: "graph",
-  ready: true,
-  component: BranchingChat,
-});
 
 export default BranchingChat;
