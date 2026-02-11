@@ -1,0 +1,10 @@
+{
+	"dependencies": {
+		"@hono/zod-validator": "^0.7.6",
+		"@langchain/langgraph-ui": "^1.1.12",
+		"hono": "^4.11.9"
+	},
+	"devDependencies": {
+		"vite": "^7.3.1"
+	}
+}
