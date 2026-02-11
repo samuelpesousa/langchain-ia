@@ -60,12 +60,16 @@ export function Sidebar({
       >
         {/* Header */}
         <div className="flex items-center gap-3 px-4 py-5 border-b border-neutral-800">
-          <div className="h-8 px-2 rounded-lg flex items-center justify-center bg-brand-dark">
-            <span className="text-sm leading-none whitespace-nowrap">🦜🔗</span>
+          <div className="h-8 w-8 rounded-lg flex items-center justify-center bg-blue-500 overflow-hidden">
+            <img
+              src="/assets/logo.png"
+              alt="Logo"
+              className="h-8 w-8 object-contain"
+            />
           </div>
           <div>
-            <h1 className="text-sm font-semibold text-white">LangGraph UI</h1>
-            <p className="text-xs text-neutral-500">Streaming Examples</p>
+            <h1 className="text-sm font-semibold text-white">CODEXA</h1>
+            <p className="text-xs text-neutral-500">Câmbio & Despacho</p>
           </div>
           <button
             onClick={onToggle}
@@ -149,7 +153,7 @@ export function Sidebar({
                   </div>
                 </div>
               );
-            }
+            },
           )}
         </nav>
 

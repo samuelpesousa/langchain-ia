@@ -14,17 +14,12 @@ import { MessageBubble } from "../../components/MessageBubble";
 import { MessageInput } from "../../components/MessageInput";
 import { ToolCallCard } from "../../components/ToolCallCard";
 
-import type { agent } from "./agent";
-
 const TOOL_AGENT_SUGGESTIONS = [
-  "What's the weather in San Francisco?",
-  "Search for the latest AI news",
-  "What's the weather in Tokyo?",
+  "Consultar cotação do dólar comercial",
+  "Solicitar status de despacho aduaneiro",
+  "Buscar fornecedores de serviços logísticos",
 ];
 
-/**
- * Helper to check if a message has actual text content.
- */
 function hasContent(message: Message): boolean {
   if (typeof message.content === "string") {
     return message.content.trim().length > 0;
@@ -60,19 +55,17 @@ export function ToolCallingAgent() {
           {!hasMessages ? (
             <EmptyState
               icon={Wrench}
-              title="Tool Calling Agent"
-              description="A smart agent with weather and search tools. Ask about the weather anywhere or search for information."
+              title="Assistente de Câmbio e Despacho"
+              description="Um assistente inteligente para consultas de câmbio, status de despacho e busca de fornecedores. Faça perguntas sobre operações de câmbio, despacho aduaneiro ou fornecedores do setor."
               suggestions={TOOL_AGENT_SUGGESTIONS}
               onSuggestionClick={handleSubmit}
             />
           ) : (
             <div className="flex flex-col gap-6">
               {stream.messages.map((message, idx) => {
-                // For AI messages, check if they have tool calls
                 if (message.type === "ai") {
                   const toolCalls = stream.getToolCalls(message);
 
-                  // Render tool calls if present
                   if (toolCalls.length > 0) {
                     return (
                       <div key={message.id} className="flex flex-col gap-3">
@@ -83,7 +76,6 @@ export function ToolCallingAgent() {
                     );
                   }
 
-                  // Skip AI messages without content
                   if (!hasContent(message)) {
                     return null;
                   }
@@ -94,7 +86,6 @@ export function ToolCallingAgent() {
                 );
               })}
 
-              {/* Show loading indicator when streaming and no content yet */}
               {stream.isLoading &&
                 !stream.messages.some(
                   (m) => m.type === "ai" && hasContent(m),
@@ -122,19 +113,18 @@ export function ToolCallingAgent() {
 
       <MessageInput
         disabled={stream.isLoading}
-        placeholder="Ask me about weather or search for info..."
+        placeholder="Pergunte sobre câmbio, despacho ou fornecedores..."
         onSubmit={handleSubmit}
       />
     </div>
   );
 }
 
-// Register this example
 registerExample({
   id: "tool-calling-agent",
-  title: "Tool Calling Agent",
+  title: "Assistente de Câmbio e Despacho",
   description:
-    "Simple agent with weather and search tools demonstrating streaming tool calls",
+    "Assistente para corretora de câmbio, despacho aduaneiro e fornecedores, demonstrando integração com ferramentas do setor.",
   category: "agents",
   icon: "tool",
   ready: true,

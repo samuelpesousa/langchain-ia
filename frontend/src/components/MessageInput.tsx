@@ -9,7 +9,7 @@ interface MessageInputProps {
 export function MessageInput({
   onSubmit,
   disabled = false,
-  placeholder = "Send a message...",
+  placeholder = "Envie uma mensagem...",
 }: MessageInputProps) {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -55,14 +55,14 @@ export function MessageInput({
           </div>
 
           <p className="text-center text-xs text-neutral-600 mt-3">
-            <kbd className="px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-400 font-mono text-[10px]">
+            <kbd className="px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-400 font-mono text-xs">
               Enter
             </kbd>{" "}
-            to send ·{" "}
-            <kbd className="px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-400 font-mono text-[10px]">
+            para enviar ·{" "}
+            <kbd className="px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-400 font-mono text-xs">
               Shift + Enter
             </kbd>{" "}
-            for new line
+            para nova linha
           </p>
         </form>
       </div>
