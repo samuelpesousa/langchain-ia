@@ -13,7 +13,6 @@ import { SubagentPipeline } from "./components/SubagentPipeline";
 
 import type { agent } from "./agent";
 
-// Sugestões de viagem traduzidas
 const VACATION_SUGGESTIONS = [
   "Planeje uma viagem romântica para Paris, 2 pessoas, 5 noites, orçamento médio",
   "Férias em família para Tóquio com 4 pessoas por uma semana, econômico",
@@ -21,9 +20,6 @@ const VACATION_SUGGESTIONS = [
   "Passeio de fim de semana em Barcelona na primavera",
 ];
 
-/**
- * Auxiliar para verificar se uma mensagem tem conteúdo de texto real
- */
 function hasContent(message: Message): boolean {
   if (typeof message.content === "string") {
     return message.content.trim().length > 0;
@@ -36,9 +32,6 @@ function hasContent(message: Message): boolean {
   return false;
 }
 
-/**
- * Hook customizado para gerenciar o ID da thread nos parâmetros da URL
- */
 function useThreadIdParam() {
   const [threadId, setThreadId] = useState<string | null>(() => {
     if (typeof window === "undefined") return null;
@@ -170,7 +163,6 @@ export function DeepAgentDemo() {
                 );
               })}
 
-              {/* Lista de Tarefas (Todos) em Azul Marinho */}
               {stream.values.todos && stream.values.todos.length > 0 && (
                 <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 p-4 shadow-sm">
                   <div className="flex items-center justify-between mb-3">
@@ -212,7 +204,6 @@ export function DeepAgentDemo() {
 
               {stream.isLoading && !hasSubagents && <LoadingIndicator />}
 
-              {/* Indicador de Síntese em Azul Marinho */}
               {stream.isLoading && allSubagentsDone && (
                 <div className="flex items-center gap-3 text-blue-900 dark:text-blue-400 animate-pulse px-4 py-2 bg-blue-50 dark:bg-blue-900/10 rounded-lg border border-blue-100 dark:border-blue-900/20 w-fit">
                   <Sparkles className="w-5 h-5" />
@@ -252,7 +243,6 @@ export function DeepAgentDemo() {
   );
 }
 
-// Registro traduzido
 registerExample({
   id: "deepagent",
   title: "Agente Profundo (Subagentes)",
