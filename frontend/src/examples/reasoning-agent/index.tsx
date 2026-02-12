@@ -12,8 +12,8 @@ import { MessageBubble } from "../../components/MessageBubble";
 import type { agent } from "./agent";
 
 const REASONING_SUGGESTIONS = [
-  "A bat and a ball cost $1.10 in total. The bat costs $1.00 more than the ball. How much does the ball cost?",
-  "If it takes 5 machines 5 minutes to make 5 widgets, how long would it take 100 machines to make 100 widgets?",
+  "Um bastão e uma bola custam R$ 1,10 no total. O bastão custa R$ 1,00 a mais que a bola. Quanto custa a bola?",
+  "Se 5 máquinas levam 5 minutos para fazer 5 itens, quanto tempo levaria para 100 máquinas fazerem 100 itens?",
 ];
 
 export function ReasoningAgent() {
@@ -30,18 +30,21 @@ export function ReasoningAgent() {
     (content: string) => {
       stream.submit({ messages: [{ content, type: "human" }] });
     },
-    [stream]
+    [stream],
   );
 
   return (
-    <div className="h-full flex flex-col">
-      <main ref={scrollRef} className="flex-1 overflow-y-auto">
+    <div className="h-full flex flex-col bg-zinc-50 dark:bg-zinc-950 transition-colors">
+      <main
+        ref={scrollRef}
+        className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-300 dark:scrollbar-thumb-zinc-800"
+      >
         <div ref={contentRef} className="max-w-2xl mx-auto px-4 py-8">
           {!hasMessages ? (
             <EmptyState
               icon={Brain}
-              title="Reasoning Agent"
-              description="Watch the model think through complex problems with extended reasoning. The thinking process is streamed to a separate bubble in real-time, showing you how the AI arrives at its conclusions."
+              title="Agente de Raciocínio"
+              description="Observe o modelo resolver problemas complexos com raciocínio estendido. O processo de pensamento é transmitido em tempo real, mostrando como a IA chega às suas conclusões."
               suggestions={REASONING_SUGGESTIONS}
               onSuggestionClick={handleSubmit}
             />
@@ -51,10 +54,12 @@ export function ReasoningAgent() {
                 <MessageBubble key={message.id ?? idx} message={message} />
               ))}
 
-              {/* Show loading indicator when streaming and no content yet, e.g. we don't have a stream of the AI response yet */}
               {stream.isLoading && stream.messages.length <= 2 && (
-                <div className="flex items-center gap-3 text-amber-400/70">
+                <div className="flex items-center gap-3 text-blue-900/70 dark:text-blue-400/70 animate-pulse">
                   <LoadingIndicator />
+                  <span className="text-xs font-medium italic">
+                    O assistente está pensando...
+                  </span>
                 </div>
               )}
             </div>
@@ -64,33 +69,34 @@ export function ReasoningAgent() {
 
       {stream.error != null && (
         <div className="max-w-2xl mx-auto px-4 pb-3">
-          <div className="bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 text-red-400 text-sm">
+          <div className="bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 text-red-600 dark:text-red-400 text-sm">
             <div className="flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>
                 {stream.error instanceof Error
                   ? stream.error.message
-                  : "An error occurred. Make sure OPENAI_API_KEY is set."}
+                  : "Ocorreu um erro. Verifique se a sua API_KEY está configurada corretamente."}
               </span>
             </div>
           </div>
         </div>
       )}
 
-      <MessageInput
-        disabled={stream.isLoading}
-        placeholder="Ask a complex reasoning question..."
-        onSubmit={handleSubmit}
-      />
+      <div className="p-4 border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+        <MessageInput
+          disabled={stream.isLoading}
+          placeholder="Faça uma pergunta complexa de lógica..."
+          onSubmit={handleSubmit}
+        />
+      </div>
     </div>
   );
 }
 
-// Register this example
 registerExample({
   id: "reasoning-agent",
-  title: "Reasoning Agent",
-  description: "Streaming reasoning tokens to a separate bubble in real-time",
+  title: "Agente de Raciocínio",
+  description: "Streaming de tokens de raciocínio (pensamento) em tempo real",
   category: "advanced",
   icon: "code",
   ready: true,

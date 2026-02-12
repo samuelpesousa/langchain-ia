@@ -13,15 +13,16 @@ import { SubagentPipeline } from "./components/SubagentPipeline";
 
 import type { agent } from "./agent";
 
+// Sugestões de viagem traduzidas
 const VACATION_SUGGESTIONS = [
-  "Plan a romantic getaway to Paris for 2 people, 5 nights, midrange budget",
-  "Family vacation to Tokyo with 4 people for a week, budget-friendly",
-  "Adventure trip to Costa Rica for 2, focusing on nature and wildlife",
-  "Weekend city break to Barcelona in spring",
+  "Planeje uma viagem romântica para Paris, 2 pessoas, 5 noites, orçamento médio",
+  "Férias em família para Tóquio com 4 pessoas por uma semana, econômico",
+  "Viagem de aventura para a Costa Rica focada em natureza e vida selvagem",
+  "Passeio de fim de semana em Barcelona na primavera",
 ];
 
 /**
- * Helper to check if a message has actual text content
+ * Auxiliar para verificar se uma mensagem tem conteúdo de texto real
  */
 function hasContent(message: Message): boolean {
   if (typeof message.content === "string") {
@@ -29,14 +30,14 @@ function hasContent(message: Message): boolean {
   }
   if (Array.isArray(message.content)) {
     return message.content.some(
-      (c) => c.type === "text" && c.text.trim().length > 0
+      (c) => c.type === "text" && c.text.trim().length > 0,
     );
   }
   return false;
 }
 
 /**
- * Custom hook to manage thread ID in URL search params
+ * Hook customizado para gerenciar o ID da thread nos parâmetros da URL
  */
 function useThreadIdParam() {
   const [threadId, setThreadId] = useState<string | null>(() => {
@@ -64,47 +65,34 @@ export function DeepAgentDemo() {
   const { scrollRef, contentRef } = useStickToBottom();
   const [threadId, onThreadId] = useThreadIdParam();
 
-  // Use filterSubagentMessages to keep main messages clean
-  // Subagent messages are accessible via stream.subagents.get(id).messages
   const stream = useStream<typeof agent>({
     assistantId: "deepagent",
     apiUrl: "http://localhost:2024",
     filterSubagentMessages: true,
     threadId,
     onThreadId,
-    // Enable automatic stream reconnection after page refresh
     reconnectOnMount: true,
   });
 
   const hasMessages = stream.messages.length > 0;
   const hasSubagents = stream.subagents.size > 0;
 
-  // Check if we're in the synthesis phase (subagents done, waiting for final response)
   const allSubagentsDone =
     hasSubagents &&
     [...stream.subagents.values()].every(
-      (s) => s.status === "complete" || s.status === "error"
+      (s) => s.status === "complete" || s.status === "error",
     );
 
-  // Filter messages: only show human messages and AI messages with actual content
-  // Tool messages and AI messages that only have tool_calls are hidden
   const displayMessages = useMemo(() => {
     return stream.messages.filter((message) => {
-      // Always show human messages
       if (message.type === "human") return true;
-
-      // Hide tool messages (they're shown in subagent cards)
       if (message.type === "tool") return false;
-
-      // For AI messages, only show if they have actual content
       if (message.type === "ai") {
-        // Hide AI messages that only contain tool_calls (no text content)
         if ("tool_calls" in message && message.tool_calls?.length) {
           return hasContent(message);
         }
         return hasContent(message);
       }
-
       return false;
     });
   }, [stream.messages]);
@@ -118,16 +106,12 @@ export function DeepAgentDemo() {
           config: {
             recursion_limit: 100,
           },
-        }
+        },
       );
     },
-    [stream]
+    [stream],
   );
 
-  /**
-   * Build a map of human message ID -> subagents for that turn.
-   * A "turn" is everything between two consecutive human messages.
-   */
   const subagentsByHumanMessage = useMemo(() => {
     const result = new Map<
       string,
@@ -138,7 +122,6 @@ export function DeepAgentDemo() {
     for (let i = 0; i < msgs.length; i++) {
       if (msgs[i].type !== "human") continue;
 
-      // The next message in the turn is the AI message with tool_calls
       const next = msgs[i + 1];
       if (!next || next.type !== "ai" || !next.id) continue;
 
@@ -151,14 +134,14 @@ export function DeepAgentDemo() {
   }, [stream.messages, stream.subagents]);
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col bg-zinc-50 dark:bg-zinc-950 transition-colors">
       <main ref={scrollRef} className="flex-1 overflow-y-auto">
         <div ref={contentRef} className="max-w-6xl mx-auto px-8 py-8">
           {!hasMessages && !hasSubagents ? (
             <EmptyState
               icon={Plane}
-              title="Dream Vacation Planner"
-              description="Tell me where you want to go, and I'll coordinate three specialist agents to plan your perfect trip: a Weather Scout, an Experience Curator, and a Budget Optimizer - all working in parallel!"
+              title="Planejador de Viagens dos Sonhos"
+              description="Diga-me para onde quer ir e eu coordenarei três agentes especialistas para planejar sua viagem: um Explorador de Clima, um Curador de Experiências e um Otimizador de Orçamento!"
               suggestions={VACATION_SUGGESTIONS}
               onSuggestionClick={handleSubmit}
             />
@@ -175,7 +158,6 @@ export function DeepAgentDemo() {
                   <div key={messageKey}>
                     <MessageBubble message={message} />
 
-                    {/* Show pipeline right after the human message that triggered it */}
                     {turnSubagents && turnSubagents.length > 0 && (
                       <div className="mt-6">
                         <SubagentPipeline
@@ -188,53 +170,54 @@ export function DeepAgentDemo() {
                 );
               })}
 
+              {/* Lista de Tarefas (Todos) em Azul Marinho */}
               {stream.values.todos && stream.values.todos.length > 0 && (
-                <div className="rounded-xl border border-neutral-800 bg-neutral-900/40 p-4">
+                <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 p-4 shadow-sm">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-md bg-brand-accent/15 flex items-center justify-center">
-                        <Sparkles className="w-4 h-4 text-brand-accent" />
+                      <div className="w-7 h-7 rounded-md bg-blue-900/10 dark:bg-blue-900/20 flex items-center justify-center">
+                        <Sparkles className="w-4 h-4 text-blue-900 dark:text-blue-400" />
                       </div>
                       <div>
-                        <h4 className="text-sm font-medium text-neutral-200">
-                          Deep Agent Todos
+                        <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-200">
+                          Tarefas do Agente Profundo
                         </h4>
-                        <p className="text-xs text-neutral-500">
-                          {stream.values.todos.length} active
+                        <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-medium">
+                          {stream.values.todos.length} ativas
                         </p>
                       </div>
                     </div>
                   </div>
                   <div className="space-y-2">
-                    {stream.values.todos.map((todo, idx) => {
-                      return (
-                        <div
-                          key={`todo-${idx}`}
-                          className="flex items-start gap-3 rounded-lg border border-neutral-800 bg-neutral-950/40 px-3 py-2 text-sm"
-                        >
-                          <div className="mt-1 h-2 w-2 rounded-full bg-brand-accent/70" />
-                          <div className="flex-1 text-neutral-200">
-                            <div>{todo.content}</div>
-                            <div className="text-xs text-neutral-500 mt-1">
-                              Status: {todo.status}
-                            </div>
+                    {stream.values.todos.map((todo, idx) => (
+                      <div
+                        key={`todo-${idx}`}
+                        className="flex items-start gap-3 rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950/40 px-3 py-2 text-sm"
+                      >
+                        <div className="mt-1.5 h-2 w-2 rounded-full bg-blue-600 dark:bg-blue-400" />
+                        <div className="flex-1 text-zinc-700 dark:text-zinc-300">
+                          <div className="font-medium">{todo.content}</div>
+                          <div className="text-[10px] text-zinc-500 mt-1 uppercase font-bold">
+                            Status:{" "}
+                            {todo.status === "complete"
+                              ? "Concluído"
+                              : "Em andamento"}
                           </div>
                         </div>
-                      );
-                    })}
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
 
-              {/* Show loading indicator when waiting for initial response */}
               {stream.isLoading && !hasSubagents && <LoadingIndicator />}
 
-              {/* Show synthesis indicator when subagents are done but still loading */}
+              {/* Indicador de Síntese em Azul Marinho */}
               {stream.isLoading && allSubagentsDone && (
-                <div className="flex items-center gap-3 text-brand-accent/70 animate-pulse">
+                <div className="flex items-center gap-3 text-blue-900 dark:text-blue-400 animate-pulse px-4 py-2 bg-blue-50 dark:bg-blue-900/10 rounded-lg border border-blue-100 dark:border-blue-900/20 w-fit">
                   <Sparkles className="w-5 h-5" />
-                  <span className="text-sm">
-                    Synthesizing your personalized vacation plan...
+                  <span className="text-sm font-semibold">
+                    Sintetizando seu plano de férias personalizado...
                   </span>
                 </div>
               )}
@@ -245,34 +228,36 @@ export function DeepAgentDemo() {
 
       {stream.error != null && (
         <div className="max-w-6xl mx-auto px-4 pb-3">
-          <div className="bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 text-red-400 text-sm">
+          <div className="bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 text-red-600 dark:text-red-400 text-sm">
             <div className="flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>
                 {stream.error instanceof Error
                   ? stream.error.message
-                  : "An error occurred. Make sure OPENAI_API_KEY is set."}
+                  : "Ocorreu um erro. Verifique se a OPENAI_API_KEY está configurada."}
               </span>
             </div>
           </div>
         </div>
       )}
 
-      <MessageInput
-        disabled={stream.isLoading}
-        placeholder="Where would you like to go? (e.g., 'Plan a trip to Japan for 2 people')"
-        onSubmit={handleSubmit}
-      />
+      <div className="p-4 border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+        <MessageInput
+          disabled={stream.isLoading}
+          placeholder="Para onde você gostaria de ir? (Ex: 'Planeje uma viagem para o Japão')"
+          onSubmit={handleSubmit}
+        />
+      </div>
     </div>
   );
 }
 
-// Register this example
+// Registro traduzido
 registerExample({
   id: "deepagent",
-  title: "Deep Agent (Subagents)",
+  title: "Agente Profundo (Subagentes)",
   description:
-    "Watch 3 specialized AI agents plan your vacation in parallel with live streaming",
+    "Assista a 3 agentes de IA especializados planejando sua viagem em paralelo",
   category: "agents",
   icon: "tool",
   ready: true,

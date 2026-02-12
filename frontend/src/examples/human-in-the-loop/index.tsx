@@ -17,27 +17,21 @@ import { MessageInput } from "../../components/MessageInput";
 import type { agent } from "./agent";
 import { ToolCallCard } from "./components/ToolCallCard";
 import type { AgentToolCalls } from "./types";
-import {
-  PendingApprovalCard,
-  DEFAULT_REJECT_REASON,
-} from "./components/PendingApprovalCard";
+import { PendingApprovalCard } from "./components/PendingApprovalCard";
 
 const HITL_SUGGESTIONS = [
-  "Send an email to john@example.com",
-  "Delete the file test.txt",
-  "Read the contents of config.json",
+  "Enviar e-mail para joao@exemplo.com",
+  "Excluir o arquivo fatura_antiga.pdf",
+  "Ler o conteúdo de regras_cambio.json",
 ];
 
-/**
- * Helper to check if a message has actual text content.
- */
 function hasContent(message: Message): boolean {
   if (typeof message.content === "string") {
     return message.content.trim().length > 0;
   }
   if (Array.isArray(message.content)) {
     return message.content.some(
-      (c) => c.type === "text" && c.text.trim().length > 0
+      (c) => c.type === "text" && c.text.trim().length > 0,
     );
   }
   return false;
@@ -52,21 +46,15 @@ export function HumanInTheLoop() {
   const { scrollRef, contentRef } = useStickToBottom();
   const [isProcessing, setIsProcessing] = useState(false);
 
-  /**
-   * Type assertion needed because the generic inference doesn't properly propagate
-   */
   const hitlRequest = stream.interrupt?.value as HITLRequest | undefined;
 
   const handleSubmit = useCallback(
     (content: string) => {
       stream.submit({ messages: [{ content, type: "human" }] });
     },
-    [stream]
+    [stream],
   );
 
-  /**
-   * Handle approval for a specific action
-   */
   const handleApprove = async (index: number) => {
     if (!hitlRequest) return;
     setIsProcessing(true);
@@ -76,9 +64,6 @@ export function HumanInTheLoop() {
           if (i === index) {
             return { type: "approve" as const };
           }
-          /**
-           * For other actions, also approve them
-           */
           return { type: "approve" as const };
         });
 
@@ -92,9 +77,6 @@ export function HumanInTheLoop() {
     }
   };
 
-  /**
-   * Handle rejection for a specific action
-   */
   const handleReject = async (index: number, reason: string) => {
     if (!hitlRequest) return;
     setIsProcessing(true);
@@ -104,15 +86,12 @@ export function HumanInTheLoop() {
           if (i === index) {
             return {
               type: "reject" as const,
-              message: reason || DEFAULT_REJECT_REASON,
+              message: reason || "Ação rejeitada pelo usuário.",
             };
           }
-          /**
-           * For other actions, also reject them to be safe
-           */
           return {
             type: "reject" as const,
-            message: "Rejected along with other actions",
+            message: "Rejeitado junto com outras ações",
           };
         });
 
@@ -126,12 +105,9 @@ export function HumanInTheLoop() {
     }
   };
 
-  /**
-   * Handle edit for a specific action
-   */
   const handleEdit = async (
     index: number,
-    editedArgs: Record<string, unknown>
+    editedArgs: Record<string, unknown>,
   ) => {
     if (!hitlRequest) return;
     setIsProcessing(true);
@@ -148,9 +124,6 @@ export function HumanInTheLoop() {
               },
             };
           }
-          /**
-           * For other actions, approve them
-           */
           return { type: "approve" as const };
         });
 
@@ -165,30 +138,28 @@ export function HumanInTheLoop() {
   };
 
   const hasMessages = stream.messages.length > 0;
+
   return (
-    <div className="h-full flex flex-col">
-      <main ref={scrollRef} className="flex-1 overflow-y-auto">
+    <div className="h-full flex flex-col bg-zinc-50 dark:bg-zinc-950 transition-colors">
+      <main
+        ref={scrollRef}
+        className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-300 dark:scrollbar-thumb-zinc-800"
+      >
         <div ref={contentRef} className="max-w-2xl mx-auto px-4 py-8">
           {!hasMessages && !stream.interrupt ? (
             <EmptyState
               icon={UserCheck}
-              title="Human in the Loop"
-              description="An agent that requires your approval for sensitive actions. Try sending an email, deleting a file, or reading file contents."
+              title="Aprovação Humana (HITL)"
+              description="Um agente que exige sua aprovação para ações sensíveis. Tente enviar um e-mail, excluir um arquivo ou ler documentos de câmbio."
               suggestions={HITL_SUGGESTIONS}
               onSuggestionClick={handleSubmit}
             />
           ) : (
             <div className="flex flex-col gap-6">
               {stream.messages.map((message, idx) => {
-                /**
-                 * For AI messages, check if they have tool calls
-                 */
                 if (message.type === "ai") {
                   const toolCalls = stream.getToolCalls(message);
 
-                  /**
-                   * Render tool calls if present
-                   */
                   if (toolCalls.length > 0) {
                     return (
                       <div key={message.id} className="flex flex-col gap-3">
@@ -204,12 +175,7 @@ export function HumanInTheLoop() {
                     );
                   }
 
-                  /**
-                   * Skip AI messages without content
-                   */
-                  if (!hasContent(message)) {
-                    return null;
-                  }
+                  if (!hasContent(message)) return null;
                 }
 
                 return (
@@ -217,9 +183,8 @@ export function HumanInTheLoop() {
                 );
               })}
 
-              {/* Show interrupt UI when awaiting approval */}
               {hitlRequest && hitlRequest.actionRequests.length > 0 && (
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
                   {hitlRequest.actionRequests.map((actionRequest, idx) => (
                     <PendingApprovalCard
                       key={idx}
@@ -234,7 +199,6 @@ export function HumanInTheLoop() {
                 </div>
               )}
 
-              {/* Show loading indicator when streaming and no content yet */}
               {stream.isLoading &&
                 !stream.interrupt &&
                 !stream.messages.some(hasContent) &&
@@ -246,40 +210,37 @@ export function HumanInTheLoop() {
 
       {stream.error != null && (
         <div className="max-w-2xl mx-auto px-4 pb-3">
-          <div className="bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 text-red-400 text-sm">
-            <div className="flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              <span>
-                {stream.error instanceof Error
-                  ? stream.error.message
-                  : "An error occurred"}
-              </span>
-            </div>
+          <div className="bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 text-red-600 dark:text-red-400 text-sm flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>
+              {stream.error instanceof Error
+                ? stream.error.message
+                : "Ocorreu um erro inesperado."}
+            </span>
           </div>
         </div>
       )}
 
-      <MessageInput
-        disabled={stream.isLoading || isProcessing || !!stream.interrupt}
-        placeholder={
-          stream.interrupt
-            ? "Please approve or reject the pending action..."
-            : "Ask me to send an email or delete a file..."
-        }
-        onSubmit={handleSubmit}
-      />
+      <div className="p-4 border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 transition-colors">
+        <MessageInput
+          disabled={stream.isLoading || isProcessing || !!stream.interrupt}
+          placeholder={
+            stream.interrupt
+              ? "Por favor, aprove ou rejeite a ação pendente..."
+              : "Peça para enviar um e-mail ou gerenciar arquivos..."
+          }
+          onSubmit={handleSubmit}
+        />
+      </div>
     </div>
   );
 }
 
-/**
- * Register this example
- */
 registerExample({
   id: "human-in-the-loop",
-  title: "Human in the Loop",
+  title: "Aprovação Humana",
   description:
-    "ReAct agent with interrupts for approving, editing, or rejecting tool calls",
+    "Agente ReAct com interrupções para aprovar, editar ou rejeitar chamadas de ferramentas",
   category: "agents",
   icon: "chat",
   ready: true,
